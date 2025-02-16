@@ -17,7 +17,7 @@ export default function Home() {
                 ประหยัดเวลาและเอกสารของคุณจะดูเป็นมืออาชีพมากขึ้น!✨
               </p>
               <div className="flex mt-6 space-x-4">
-                <Link href="/pages/createDocument">
+                <Link href="/documents">
                   <button className="bg-[#1d4ed8] hover:bg-yellow-500 text-white font-medium py-2 px-4 rounded-lg shadow-md">
                     เริ่มต้นสร้างเอกสาร
                   </button>

@@ -1,7 +1,6 @@
-// ThaiDocument.ts หรือ MyDocument.ts
 import jsPDF from 'jspdf';
 import '../fonts/THSarabun-normal';
-import garudaBase64 from './garudaImage'; // Import Base64
+// import garudaBase64 from './garudaImage';
 
 const cmToPt = (cm) => cm * 28.346;
 

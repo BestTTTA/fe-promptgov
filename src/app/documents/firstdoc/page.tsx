@@ -1,9 +1,8 @@
-// CreateDocumentPage.tsx
 "use client";
 import React, { useState } from "react";
 import createThaiDocument from "../../../components/MyDocument";
 
-function CreateDocumentPage() {
+function firstDoc() {
   const [formData, setFormData] = useState({
     documentNumber: "",
     date: "",
@@ -224,4 +223,4 @@ function CreateDocumentPage() {
   );
 }
 
-export default CreateDocumentPage;
+export default firstDoc;
