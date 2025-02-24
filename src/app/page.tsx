@@ -6,7 +6,6 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center bg-[url('/background.svg')] bg-cover bg-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-col md:flex-row items-center justify-between">
-          {/* Left side content */}
           <div className="w-full md:w-1/2 md:pr-8 mb-8 md:mb-0">
             <div className="max-w-lg">
               <h1 className="text-3xl md:text-5xl font-bold text-gray-800">
@@ -28,7 +27,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-          {/* Right side images with overlap */}
           <div className="w-full md:w-1/2 relative">
             <div className="relative">
               <Image

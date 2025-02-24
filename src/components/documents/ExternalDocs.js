@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import '../fonts/THSarabun-normal';
+import '../../fonts/THSarabun-normal';
 // import garudaBase64 from './garudaImage';
 
 const cmToPt = (cm) => cm * 28.346;

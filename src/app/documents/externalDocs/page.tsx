@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import createThaiDocument from "../../../components/MyDocument";
+import createThaiDocument from "../../../components/documents/ExternalDocs";
 import AIContentGenerator from "../../../components/GeminiGenerator";
 
 function firstDoc() {
