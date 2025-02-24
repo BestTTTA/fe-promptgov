@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import createThaiDocument from "../../../components/MyDocument";
+import AIContentGenerator from "../../../components/GeminiGenerator";
 
 function firstDoc() {
   const [formData, setFormData] = useState({
@@ -148,11 +149,12 @@ function firstDoc() {
               overflowWrap: 'break-word',   // ตัดคำเมื่อเกินขอบ
               lineHeight: '1.8',            // เพิ่มระยะห่างระหว่างบรรทัด
               fontFamily: 'THSarabun',
-                    // ตัดคำเมื่อจำเป็น
-              textAlign: 'justify',         // จัดข้อความชิดขอบทั้งสองด้าน
+                   
+              textAlign: 'justify',        
               padding: '1em'
             }}
           />
+            <AIContentGenerator formData={formData} setFormData={setFormData} />
         </div>
         <div>
           <label className="block text-gray-700">ลงชื่อ:</label>
