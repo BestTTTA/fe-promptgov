@@ -18,7 +18,6 @@ class ThaiDocument {
       right: cmToPt(2)
     };
 
-    // ตั้งค่าฟอนต์และขนาด
     this.doc.setFont('THSarabunNew');
     this.doc.setFontSize(16);
     

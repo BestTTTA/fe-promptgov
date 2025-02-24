@@ -8,7 +8,7 @@ const SelectPage = () => {
     const [search, setSearch] = useState<string>("");
 
     const documents = [
-        { name: "เอกสารแรก", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
+        { name: "เอกสารแรก", path: "/documents/externalDocs", icon: "/doc-icon/google-docs.png" },
         { name: "เอกสารสอง", path: "/documents/seccondDoc", icon: "/doc-icon/paper.png" },
     ];
     const documentsnormal = [
