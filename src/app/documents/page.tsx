@@ -14,6 +14,7 @@ const SelectPage = () => {
     const documentsnormal = [
         { name: "เอกสารแรกทั่วไป", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
         { name: "เอกสารสองทั่วไป", path: "/documents/secconddoc", icon: "/doc-icon/paper.png" },
+        { name: "เอกสารหนังสือภายใน", path: "/documents/InternalDocs", icon: "/doc-icon/icon-docs-internal.png" },
     ];
     const publicrelationsbook = [
         { name: "หนังสือแรกประชาสัมพันธ์", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
