@@ -13,29 +13,14 @@ interface DocumentData {
     signature: string;
 }
 
-/** 
- * The response from your API might look like:
- * {
- *   "document": {
- *     "referenceNumber": "...",
- *     "date": "...",
- *     "subject": "...",
- *     "recipient": "...",
- *     "content": "...",
- *     "conclusion": "...",
- *     "signature": "..."
- *   }
- * }
- */
 export default function ExampleDoc() {
     const [documentData, setDocumentData] = useState<DocumentData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [pdfUrl, setPdfUrl] = useState<string>('');
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-    const handlePdfUpdate = () => {
-        if (!documentData) return;
-
+    const generatePdf = (data: DocumentData) => {
         const doc = new jsPDF();
         doc.addFont('/fonts/THSarabun.ttf', 'THSarabun', 'normal');
         doc.setFont('THSarabun');
@@ -44,40 +29,86 @@ export default function ExampleDoc() {
         const margin = 20;
         let yPos = margin;
 
-        doc.text(documentData.referenceNumber, margin, yPos);
+        doc.text(data.referenceNumber, margin, yPos);
         yPos += 10;
 
-        doc.text(documentData.date, margin, yPos);
+        doc.text(data.date, margin, yPos);
         yPos += 10;
 
-        doc.text(documentData.subject, margin, yPos);
+        doc.text(data.subject, margin, yPos);
         yPos += 10;
 
-        doc.text(documentData.recipient, margin, yPos);
+        doc.text(data.recipient, margin, yPos);
         yPos += 15;
 
-        const splitContent = doc.splitTextToSize(documentData.content, doc.internal.pageSize.width - 2 * margin);
+        const splitContent = doc.splitTextToSize(data.content, doc.internal.pageSize.width - 2 * margin);
         doc.text(splitContent, margin, yPos);
         yPos += 10 * splitContent.length;
 
-        doc.text(documentData.conclusion, margin, yPos);
+        doc.text(data.conclusion, margin, yPos);
         yPos += 15;
 
-        const signatureLines = documentData.signature.split('\n');
+        const signatureLines = data.signature.split('\n');
         signatureLines.forEach((line: string) => {
             doc.text(line, margin, yPos);
             yPos += 10;
         });
 
-        const pdfDataUri = doc.output('datauristring');
-        setPdfUrl(pdfDataUri);
+        return doc.output('datauristring');
     };
+
+    const handleSaveChanges = () => {
+        if (!documentData) return;
+        const pdfDataUri = generatePdf(documentData);
+        setPdfUrl(pdfDataUri);
+        setHasUnsavedChanges(false);
+    };
+
+    useEffect(() => {
+        const fetchDocument = async () => {
+            setLoading(true);
+            setError('');
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: examplePrompt }),
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Failed to generate content');
+                }
+
+                const parsedData = typeof result.data === 'string'
+                    ? JSON.parse(result.data)
+                    : result.data;
+
+                if (!parsedData?.document) {
+                    throw new Error('Response does not contain "document" key.');
+                }
+
+                setDocumentData(parsedData.document);
+                const pdfDataUri = generatePdf(parsedData.document);
+                setPdfUrl(pdfDataUri);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'An error occurred');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDocument();
+    }, []);
 
     const handleRefresh = async () => {
         setLoading(true);
         setError('');
-
-        const prompt = examplePrompt;
+        setHasUnsavedChanges(false);
 
         try {
             const response = await fetch('/api/chat', {
@@ -85,7 +116,7 @@ export default function ExampleDoc() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ prompt: examplePrompt }),
             });
 
             const result = await response.json();
@@ -103,7 +134,8 @@ export default function ExampleDoc() {
             }
 
             setDocumentData(parsedData.document);
-
+            const pdfDataUri = generatePdf(parsedData.document);
+            setPdfUrl(pdfDataUri);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
         } finally {
@@ -119,13 +151,23 @@ export default function ExampleDoc() {
                     Document Example
                 </h1>
 
-                <button
-                    onClick={handleRefresh}
-                    disabled={loading}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                    {loading ? 'Loading...' : 'Refresh Document'}
-                </button>
+                <div className="flex space-x-4">
+                    <button
+                        onClick={handleRefresh}
+                        disabled={loading}
+                        className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                        {loading ? 'Loading...' : 'Refresh Document'}
+                    </button>
+                    {hasUnsavedChanges && (
+                        <button
+                            onClick={handleSaveChanges}
+                            className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                        >
+                            Save Changes
+                        </button>
+                    )}
+                </div>
 
                 {error && (
                     <div className="mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -145,7 +187,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         subject: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
@@ -160,7 +202,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         referenceNumber: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
@@ -175,7 +217,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         date: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
@@ -190,7 +232,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         recipient: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
@@ -204,7 +246,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         content: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 rows={6}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -220,7 +262,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         conclusion: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
@@ -234,7 +276,7 @@ export default function ExampleDoc() {
                                         ...prev!,
                                         signature: e.target.value
                                     }));
-                                    handlePdfUpdate();
+                                    setHasUnsavedChanges(true);
                                 }}
                                 rows={4}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
