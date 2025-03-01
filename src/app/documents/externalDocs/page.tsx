@@ -137,6 +137,7 @@ function firstDoc() {
             className="w-full border p-2 rounded"
           />
         </div>
+
         <div>
           <label className="block text-gray-700">เนื้อหา:</label>
           <textarea
@@ -149,13 +150,14 @@ function firstDoc() {
               overflowWrap: 'break-word',   // ตัดคำเมื่อเกินขอบ
               lineHeight: '1.8',            // เพิ่มระยะห่างระหว่างบรรทัด
               fontFamily: 'THSarabun',
-                   
-              textAlign: 'justify',        
+
+              textAlign: 'justify',
               padding: '1em'
             }}
           />
-            <AIContentGenerator formData={formData} setFormData={setFormData} />
+          <AIContentGenerator formData={formData} setFormData={setFormData} />
         </div>
+        
         <div>
           <label className="block text-gray-700">ลงชื่อ:</label>
           <input

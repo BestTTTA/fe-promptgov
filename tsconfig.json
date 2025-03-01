@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/GeminiGenerator.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/GeminiGenerator.js", "src/fonts/THSarabun-bold.ts", "src/fonts/THSarabun-bold.js"],
   "exclude": ["node_modules"]
 }
