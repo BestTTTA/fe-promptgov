@@ -8,7 +8,7 @@ const SelectPage = () => {
     const [search, setSearch] = useState<string>("");
 
     const documents = [
-        { name: "เอกสารแรก", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
+        { name: "เอกสารแรก", path: "/documents/externalDocs", icon: "/doc-icon/google-docs.png" },
         { name: "เอกสารสอง", path: "/documents/seccondDoc", icon: "/doc-icon/paper.png" },
     ];
     const documentsnormal = [
@@ -16,11 +16,18 @@ const SelectPage = () => {
         { name: "เอกสารสองทั่วไป", path: "/documents/secconddoc", icon: "/doc-icon/paper.png" },
         { name: "เอกสารหนังสือภายใน", path: "/documents/InternalDocs", icon: "/doc-icon/icon-docs-internal.png" },
     ];
+    const publicrelationsbook = [
+        { name: "หนังสือแรกประชาสัมพันธ์", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
+        { name: "หนังสือสองประชาสัมพันธ์", path: "/documents/secconddoc", icon: "/doc-icon/paper.png" },
+    ]
 
     const filteredDocs = documents.filter((doc) =>
         doc.name.toLowerCase().includes(search.toLowerCase())
     );
     const filteredDocsNormal = documentsnormal.filter((doc) =>
+        doc.name.toLowerCase().includes(search.toLowerCase())
+    );
+    const filteredPublicrelationsbook = publicrelationsbook.filter((doc) =>
         doc.name.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -61,6 +68,25 @@ const SelectPage = () => {
                 <div className="flex gap-4 w-full pl-4">
                     {filteredDocsNormal.length > 0 ? (
                         filteredDocsNormal.map((doc, index) => (
+                            <Link
+                                key={index}
+                                href={doc.path}
+                                className="flex flex-col w-fit gap-y-4 items-center justify-center p-8 border rounded-lg hover:bg-gray-100"
+                            >
+                                <Image src={doc.icon} alt={doc.name} width={100} height={100} />
+                                <span>{doc.name}</span>
+                            </Link>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">ไม่พบเอกสารที่ค้นหา</p>
+                    )}
+                </div>
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+                <p className="font-bold">หนังสือประชาสัมพันธ์</p>
+                <div className="flex gap-4 w-full pl-4">
+                    {filteredPublicrelationsbook.length > 0 ? (
+                        filteredPublicrelationsbook.map((doc, index) => (
                             <Link
                                 key={index}
                                 href={doc.path}
