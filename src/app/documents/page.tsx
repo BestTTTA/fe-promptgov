@@ -10,6 +10,9 @@ const SelectPage = () => {
     const documents = [
         { name: "เอกสารแรก", path: "/documents/externalDocs", icon: "/doc-icon/google-docs.png" },
         { name: "เอกสารสอง", path: "/documents/seccondDoc", icon: "/doc-icon/paper.png" },
+        { name: "เอกสารสาม", path: "/documents/newsDocs", icon: "/doc-icon/google-docs."
+        }
+
     ];
     const documentsnormal = [
         { name: "เอกสารแรกทั่วไป", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
