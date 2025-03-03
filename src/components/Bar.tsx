@@ -55,7 +55,6 @@ const Navbar = () => {
     router.push('/');
   };
 
-
   return (
     <nav className="bg-white shadow-md py-4 px-6 flex items-center justify-between">
       <div onClick={() => router.push("/")} className="flex text-lg font-extrabold text-[#1d4ed8] cursor-pointer">
