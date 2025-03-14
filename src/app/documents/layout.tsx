@@ -1,4 +1,3 @@
-import React from 'react';
 import Navbar from '@/components/Bar';
 
 export default function PagesLayout({
@@ -7,9 +6,11 @@ export default function PagesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main>
-      <Navbar />
-      {children}
-    </main>
+    <>
+      <main>
+        <Navbar />
+        {children}
+      </main>
+    </>
   );
 }
