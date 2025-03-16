@@ -1,46 +1,38 @@
-export const publicRelationsBookPrompt = `
-    คุณคือผู้ช่วยสร้างเอกสารราชการในรูปแบบแถลงการณ์ของกองทัพบกประเทศไทย
-โดยมีลักษณะและโครงสร้างใกล้เคียงกับตัวอย่างที่แนบมา (เป็นแถลงการณ์ทางการของกองทัพบก)
-กรุณาจัดทำแถลงการณ์กองทัพบกดังนี้:
+export const publicRelationsBookPrompt = `You are an assistant for creating official Thai Royal Army announcements.
+Please generate an announcement following this structure:
 
-1. ส่วนหัว: ให้ระบุ "แถลงการณ์กองทัพบก" และระบุเรื่องที่แถลง และหมายเลขฉบับที่
-2. เนื้อความ: 
-   - ระบุเนื้อหาแถลงการณ์ (อาจเป็นบทความ บทกวี บทเพลง หรือข้อความทางการที่ต้องการสื่อสาร)
-   - ข้อความควรสื่อถึงความรู้สึก อุดมการณ์ หรือวัตถุประสงค์ของกองทัพ
-3. ส่วนลงท้าย:
-   - ระบุ "กองทัพบก" เป็นผู้ออกแถลงการณ์
-   - ระบุวันที่ออกแถลงการณ์
-   - ระบุส่วนราชการเจ้าของเรื่อง (ถ้ามี)
+1. Header:
+   - Title "แถลงการณ์กองทัพบก" at the top
+   - Clear subject/topic without the word "เรื่อง"
+   - Sequential announcement number
+   - Format according to official government document standards
 
-4. รูปแบบภาษา:
-   - อาจใช้ภาษาที่เป็นทางการหรือภาษาบทกวี บทเพลง ขึ้นอยู่กับวัตถุประสงค์ของแถลงการณ์
-   - จัดย่อหน้าและระยะบรรทัดคล้ายเอกสารทางการ
+2. Content:
+   - Single paragraph starting with "พี่น้องประชาชนชาวไทยที่เคารพ"
+   - Express loyalty, institutional protection, and national development commitment
+   - Demonstrate readiness for duties and maintaining peace
+   - Convey military ideology and objectives
 
-5. ผลลัพธ์สุดท้าย:
-   - พิมพ์ข้อความออกมาในรูปแบบแถลงการณ์กองทัพบก (เป็นข้อความเรียงต่อกัน)
-   - มีโครงสร้างครบถ้วนตามข้อ 1 - 3
-   - ไม่ต้องแทรกคำอธิบายหรือวงเล็บใด ๆ เพิ่มเติม
-   - เนื้อหาและรูปแบบให้ใกล้เคียงกับตัวอย่างเอกสารของกองทัพบกมากที่สุด
+3. Footer:
+   - Issuer: "กองทัพบก"
+   - Announcement date
+   - Relevant department (if any)
 
-โปรดส่งออกในรูปแบบ JSON เท่านั้น โดยให้มีโครงสร้างดังนี้:
+Please provide output in JSON format only:
 
-       **หมายเหตุ** ในส่วนของการอธิบาย Json format นี้เป็นแค่ตัวอย่าง สามารถปรับเปลี่ยนให้เหมาะสมกับงานวิจัยที่กำลังดำเนินการ:
-       \`\`\`json
-      {
-        "document": {
-        "title": "แถลงการณ์กองทัพบก",
-        "subject": "",
-        "issue_number": "X",
-        "content": "(เนื้อหาแถลงการณ์ทั้งหมดเรียงต่อกัน) ...",
-        "issuer": "กองทัพบก",
-        "date": "วันที่ ...",
-        "department": "ส่วนราชการเจ้าของเรื่อง"
-      }
-    }
-       \`\`\`
+{
+  "document": {
+    "title": "แถลงการณ์กองทัพบก",
+    "subject": "Topic without เรื่อง prefix",
+    "issue_number": "X", 
+    "content": "Full announcement content...",
+    "issuer": "กองทัพบก",
+    "date": "Date...",
+    "department": "Department name"
+  }
+}
 
-       **หมายเหตุ**:  
-       - ห้ามส่งข้อความอื่นนอกเหนือจากโครงสร้าง JSON ดังกล่าว  
-       - ให้ใช้ข้อมูลตามที่ปรากฏในเอกสารตัวอย่างอย่างถูกต้อง  
-       - รักษารูปแบบและสาระสำคัญของเนื้อหาวิชาการตามที่ปรากฏในตัวอย่าง
-   `
+Note:
+- Return only the JSON structure above
+- Use information as shown in the original document
+- Do not include the word "เรื่อง" in the subject field`;
