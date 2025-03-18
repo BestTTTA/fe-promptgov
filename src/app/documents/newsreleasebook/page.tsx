@@ -3,38 +3,34 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import jsPDF from 'jspdf';
 import { Sarabun } from 'next/font/google';
 import html2canvas from 'html2canvas';
-import { publicRelationsBookPrompt } from '../../../../prompt/publicRelationsBook';
+import { newsreleasebookPrompt } from '@/prompt/newsreleasebook';
+import AIContentGenerator from '@/components/GeminiGenerator';
 
-// Font configuration
 const sarabun = Sarabun({
     weight: ['300'],
     variable: '--font-sarabun',
     subsets: ['thai'],
 });
 
-// Document data interface
 interface DocumentData {
-    title: string;
-    subject: string;
-    issue_number: string;
-    content: string;
-    issuer: string;
+    documentNumber: string;
     date: string;
+    subject: string;
+    content: string;
+    signature: string;
     department: string;
+    contactPerson: string;
 }
 
 export default function ExampleDoc() {
-    // State management
     const [documentData, setDocumentData] = useState<DocumentData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [isPdfGenerating, setIsPdfGenerating] = useState<boolean>(false);
 
-    // Refs for DOM elements
     const formRef = useRef<HTMLDivElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
 
-    // Fetch document data from API
     const fetchDocumentData = useCallback(async () => {
         setLoading(true);
         setError('');
@@ -42,94 +38,85 @@ export default function ExampleDoc() {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: publicRelationsBookPrompt }),
+                body: JSON.stringify({ prompt: newsreleasebookPrompt }),
             });
-            
+            const result = await response.json();
             if (!response.ok) {
-                const result = await response.json();
                 throw new Error(result.error || 'Failed to generate content');
             }
-
-            const result = await response.json();
             const parsedData = typeof result.data === 'string'
                 ? JSON.parse(result.data)
                 : result.data;
-
             if (!parsedData?.document) {
                 throw new Error('Response does not contain "document" key.');
             }
-
             setDocumentData(parsedData.document);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
-            console.error('Fetch error:', err);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    // Initial data fetch
     useEffect(() => {
         fetchDocumentData();
     }, [fetchDocumentData]);
 
-    // Handle PDF generation and download
     const handleDownloadPDF = useCallback(async () => {
         if (!previewRef.current || !documentData) return;
-        
         setIsPdfGenerating(true);
         try {
-            // Generate canvas from DOM element
+            // เพิ่มการหน่วงเวลาเล็กน้อยเพื่อให้ UI อัพเดทก่อนสร้าง PDF
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             const canvas = await html2canvas(previewRef.current, {
                 scale: 2,
                 useCORS: true,
                 logging: false,
                 backgroundColor: "#ffffff",
-                windowWidth: previewRef.current.scrollWidth,
-                windowHeight: previewRef.current.scrollHeight,
+                windowWidth: 21 * 37.8,
+                windowHeight: 29.7 * 37.8,
             });
-
-            // Create PDF
+            
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({
                 orientation: 'portrait',
-                unit: 'mm',
+                unit: 'cm',
                 format: 'a4',
             });
-
-            // Calculate dimensions
-            const imgWidth = 210;
+            
+            const imgWidth = 21;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            // Add image and metadata
+            
+            // ใช้ข้อมูลปัจจุบันจาก documentData
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             pdf.setProperties({
-                title: 'แถลงการณ์กองทัพบก',
+                title: 'ข่าวแจก',
                 subject: documentData.subject,
                 creator: 'Document System',
                 author: 'System',
             });
-
-            pdf.save('document.pdf');
+            
+            // เพิ่มชื่อไฟล์ที่มีความหมาย
+            const fileName = `ข่าวแจก_${documentData.documentNumber || 'ไม่ระบุ'}.pdf`;
+            pdf.save(fileName);
         } catch (err) {
             setError('Failed to generate PDF: ' + (err instanceof Error ? err.message : String(err)));
             console.error('PDF generation error:', err);
         } finally {
             setIsPdfGenerating(false);
         }
-    }, [documentData]);
+    }, [documentData]); // เพิ่ม documentData ใน dependencies
+    
 
-    // Handle refresh button click
     const handleRefresh = useCallback(async () => {
         setLoading(true);
         setError('');
         await fetchDocumentData();
     }, [fetchDocumentData]);
 
-    // Render component
     return (
         <main className="min-h-screen bg-gray-50 flex flex-col p-4">
-            {/* Header controls */}
             <div className="flex items-center gap-4 p-4 bg-white rounded-md drop-shadow-sm">
                 <h1 className="text-xl font-bold text-gray-800 whitespace-nowrap">Document Example</h1>
                 <div className="flex gap-4 w-full">
@@ -152,10 +139,9 @@ export default function ExampleDoc() {
                 </div>
             </div>
 
-            {/* Main content */}
-            <div className="flex mt-6">
-                {/* Form section */}
-                <div className="flex-1 pr-0 md:pr-4 mb-8 md:mb-0">
+            <div className="flex flex-col md:flex-row mt-6 gap-4">
+                {/* ฟอร์มด้านซ้าย */}
+                <div className="w-full md:w-1/2">
                     {error && (
                         <div className="mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
                             {error}
@@ -165,37 +151,61 @@ export default function ExampleDoc() {
                         <div
                             id="document-form"
                             ref={formRef}
-                            className={`mt-8 bg-white shadow ${sarabun.className} w-[595px] min-h-[842px] mx-auto p-10 box-border overflow-y-auto`}
+                            className={`mt-8 bg-white shadow ${sarabun.className} w-full max-w-[21cm] min-h-[29.7cm] mx-auto p-[2cm] box-border overflow-y-auto`}
                         >
-                            {/* Form fields */}
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">อ้างอิง</label>
+                                <label className="block text-sm font-medium text-gray-700">หน่วยงาน</label>
                                 <input
                                     type="text"
-                                    value={documentData.title}
-                                    onChange={(e) => setDocumentData(prev => ({ ...prev!, title: e.target.value }))}
+                                    value={documentData.department}
+                                    onChange={(e) => setDocumentData(prev => prev ? { ...prev, department: e.target.value } : null)}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
-                            <div className="mt-8">
-                                <label className="block text-sm font-medium text-gray-700">เรื่อง</label>
-                                <input
-                                    type="text"
-                                    placeholder="เรื่อง"
-                                    value={documentData.subject}
-                                    onChange={(e) => setDocumentData(prev => ({ 
-                                        ...prev!, 
-                                        subject: e.target.value
-                                    }))}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                />
 
+                            <div className="mt-8">
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700">เรื่อง</label>
+                                    <input
+                                        type="text"
+                                        value={documentData.subject}
+                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, subject: e.target.value } : null)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700">ฉบับที่</label>
                                     <input
                                         type="text"
-                                        value={documentData.issue_number}
-                                        onChange={(e) => setDocumentData(prev => ({ ...prev!, issue_number: e.target.value }))}
+                                        value={documentData.documentNumber}
+                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, documentNumber: e.target.value } : null)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700">วัน เดือน ปี</label>
+                                    <input
+                                        type="text"
+                                        value={documentData.date}
+                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, date: e.target.value } : null)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700">ลงชื่อ</label>
+                                    <input
+                                        type="text"
+                                        value={documentData.signature}
+                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, signature: e.target.value } : null)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700">ส่วนราชการเจ้าของเรื่อง</label>
+                                    <input
+                                        type="text"
+                                        value={documentData.contactPerson}
+                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, contactPerson: e.target.value } : null)}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
                                 </div>
@@ -203,36 +213,9 @@ export default function ExampleDoc() {
                                     <label className="block text-sm font-medium text-gray-700">เนื้อหา</label>
                                     <textarea
                                         value={documentData.content}
-                                        onChange={(e) => setDocumentData(prev => ({ ...prev!, content: e.target.value }))}
-                                        className="w-full border p-4 rounded min-h-[200px] whitespace-pre-wrap overflow-wrap break-words"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">ถึง</label>
-                                    <input
-                                        type="text"
-                                        value={documentData.issuer}
-                                        onChange={(e) => setDocumentData(prev => ({ ...prev!, issuer: e.target.value }))}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">วันที่</label>
-                                    <input
-                                        type="text"
-                                        value={documentData.date}
-                                        onChange={(e) => setDocumentData(prev => ({ ...prev!, date: e.target.value }))}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">ลายเซ็น</label>
-                                    <textarea
-                                        value={documentData.department}
-                                        onChange={(e) => setDocumentData(prev => ({ ...prev!, department: e.target.value }))}
-                                        rows={1}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        style={{ textAlign: 'left', height: '40px' }}
+                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, content: e.target.value } : null)}
+                                        className="w-full border p-2 rounded h-32 whitespace-pre-wrap overflow-wrap break-words"
+                                        style={{ lineHeight: '1.5' }}
                                     />
                                 </div>
                             </div>
@@ -240,67 +223,66 @@ export default function ExampleDoc() {
                     )}
                 </div>
 
-                {/* Preview section */}
+                {/* ตัวอย่าง PDF ด้านขวา */}
                 {documentData && (
-                    <div className="flex-1 p-2 bg-gray-600">
+                    <div className="w-full md:w-1/2 p-2 bg-gray-600">
                         <h2 className="text-xl font-bold mb-4 text-white text-center">
                             ตัวอย่าง <strong className="text-red-400 font-extrabold">PDF</strong>
                         </h2>
                         <div
                             id="document-preview"
                             ref={previewRef}
-                            className={`mt-8 bg-white shadow ${sarabun.className} w-[210mm] min-h-[297mm] mx-auto p-10 box-border overflow-y-auto relative`}
+                            className={`mt-8 bg-white shadow-lg ${sarabun.className} w-[21cm] h-[29.7cm] mx-auto p-[2cm] box-border overflow-hidden relative`}
+                            style={{
+                                boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                                border: '1px solid #ddd',
+                                margin: '0 auto',
+                            }}
                         >
-                            {/* Document header */}
-                            <div className="flex justify-center items-center mb-[2px] mt-[1.5mm] pl-[30mm] pr-[20mm]">
-                                <img
-                                    src="/img/krut-3-cm.png"
-                                    alt="ครุฑ"
-                                    className="w-[27mm] h-[30mm] object-contain block mx-auto"
-                                />
+                            <div className="text-center relative mt-[2.5cm] pl-[0.8cm] mb-[0.3cm]">
+                                <div className="text-lg">{documentData.department}</div>
                             </div>
-                            <div className="text-center mb-[5px] mt-[2mm] pl-[30mm] pr-[20mm]">
-                                <div>{documentData.title}</div>
-                            </div>
-                            <div className="text-center mb-[55px] pl-[30mm] pr-[20mm] relative">
-                                <div className="mb-[2px]">
-                                    <span>เรื่อง {documentData.subject}</span>
+                            <div className="text-center mb-[5.5cm] pl-[3cm] pr-[2cm] relative">
+                                <div className="mb-[0.3cm]">
+                                    <span>{documentData.subject}</span>
                                 </div>
-                                {documentData.issue_number && !/^ฉบับที่\s*/.test(documentData.issue_number) && (
-                                    <div className="mb-[8px]">
-                                        <span>(ฉบับที่ {documentData.issue_number})</span>
-                                    </div>
-                                )}
+                                <div className="text-center mb-[0.5cm] mt-[0.1cm] pl-[2cm] pr-[2cm]">
+                                    <div>{documentData.documentNumber}</div>
+                                </div>
                             </div>
-                            <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-10mm]" />
-                            <div className="max-w-[715px] pl-[2cm] pr-[10mm] mb-[20px] leading-[1.8] break-words"
+                            <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-50mm]" />
+                            <div
+                                className="max-w-[715px] mx-auto pl-[1.5cm] pr-[0.2cm] leading-[1.8] text-justify break-words mt-[-10px]"
                                 style={{
                                     textIndent: '2.5cm',
-                                    textAlign: 'justify',
                                     whiteSpace: 'pre-wrap',
-                                    wordSpacing: '-1px',
-                                    letterSpacing: '-0.1px',
+                                    marginTop: '-4cm',
+                                    wordSpacing: '-0.5px',
+                                    letterSpacing: '-0.3px',
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
-                                    WebkitHyphens: 'none',
-                                    MozHyphens: 'none',
-                                    hyphens: 'none',
-                                    fontKerning: 'normal',
-                                    fontFamily: '"Sarabun", "Noto Sans Thai", sans-serif',
+                                    textJustify: 'inter-word',
+                                    WebkitHyphens: 'auto',
+                                    MozHyphens: 'auto',
+                                    hyphens: 'auto',
+                                    fontKerning: 'auto',
+                                    fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
+                                    fontSize: '16px',
+                                    lineHeight: '1.8',
                                 }}
                             >
                                 {documentData.content}
                             </div>
-                            
-                            {/* Document footer */}
-                            <div className="text-center pl-[28mm] mb-[10.6px] text-[16px]">
-                                {documentData.issuer}
+
+                            <div className="text-center pl-[4.1cm] mb-[0.4cm] text-[16px]">
+                                {documentData.signature}
                             </div>
-                            <div className="text-center pl-[42mm] mb-[10px] text-[16px]">
+                            <div className="text-center pl-[4.3cm] mb-[0.5cm] text-[16px]">
                                 {documentData.date}
                             </div>
-                            <div className="text-left pl-[20mm] pr-[60mm] relative mb-[16px]">
-                                {documentData.department}
+
+                            <div className="text-left pl-[2cm] pr-[6cm] relative mb-[1.6cm]">
+                                <div className="text-black">{documentData.contactPerson}</div>
                             </div>
                         </div>
                     </div>

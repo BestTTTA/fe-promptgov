@@ -8,10 +8,12 @@ Please generate an announcement following this structure:
    - Format according to official government document standards
 
 2. Content:
-   - Single paragraph starting with "พี่น้องประชาชนชาวไทยที่เคารพ"
-   - Express loyalty, institutional protection, and national development commitment
-   - Demonstrate readiness for duties and maintaining peace
-   - Convey military ideology and objectives
+   - Single paragraph with normal Thai text spacing
+   - Content should start with "พี่น้องประชาชนชาวไทยที่เคารพ"
+   - Text should be justified with natural word spacing
+   - Maintain proper Thai language spacing conventions
+   - Content should flow naturally without excessive gaps between words
+   - Use standard Thai font metrics and spacing
 
 3. Footer:
    - Issuer: "กองทัพบก"
@@ -25,7 +27,7 @@ Please provide output in JSON format only:
     "title": "แถลงการณ์กองทัพบก",
     "subject": "Topic without เรื่อง prefix",
     "issue_number": "X", 
-    "content": "Full announcement content...",
+    "content": "Full announcement content with natural Thai spacing...",
     "issuer": "กองทัพบก",
     "date": "Date...",
     "department": "Department name"
@@ -35,4 +37,5 @@ Please provide output in JSON format only:
 Note:
 - Return only the JSON structure above
 - Use information as shown in the original document
+- Maintain natural Thai language spacing in content
 - Do not include the word "เรื่อง" in the subject field`;
