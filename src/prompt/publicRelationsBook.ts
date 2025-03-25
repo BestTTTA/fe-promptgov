@@ -8,12 +8,12 @@ Please generate an announcement following this structure:
    - Format according to official government document standards
 
 2. Content:
-   - Single paragraph with normal Thai text spacing
-   - Content should start with
-   - Text should be justified with natural word spacing
-   - Maintain proper Thai language spacing conventions
-   - Content should flow naturally without excessive gaps between words
-   - Use standard Thai font metrics and spacing
+   - Single paragraph with exactly one space between words
+   - Content must use single spacing between all words
+   - Text should be justified with single space word separation
+   - No multiple spaces allowed between any words or characters
+   - Content must maintain consistent single space formatting
+   - Use standard Thai font with single space metrics
 
 3. Footer:
    - Issuer: "กองทัพบก"

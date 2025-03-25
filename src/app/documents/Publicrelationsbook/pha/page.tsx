@@ -41,35 +41,47 @@ export default function ExampleDoc() {
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ prompt: publicRelationsBookPrompt }),
             });
 
-            if (!response.ok) {
-                const result = await response.json();
-                throw new Error(result.error || 'Failed to generate content');
+            const text = await response.text();
+            let result;
+            
+            try {
+                result = text ? JSON.parse(text) : null;
+            } catch (e) {
+                console.error('Parse error:', text);
+                throw new Error('Invalid response format');
             }
 
-            const result = await response.json();
-            // Parse response data with single space formatting
+            if (!response.ok || !result) {
+                throw new Error(result?.error || `Server error: ${response.status}`);
+            }
+
             const parsedData = typeof result.data === 'string'
                 ? JSON.parse(result.data)
                 : result.data;
 
             if (!parsedData?.document) {
-                throw new Error('Response does not contain "document" key.');
+                throw new Error('Invalid response structure');
             }
 
-            // Format document content with single spaces
             if (parsedData.document.content) {
                 parsedData.document.content = parsedData.document.content
-                    .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
-                    .trim();               // Remove leading/trailing spaces
+                    .replace(/\s+/g, ' ')
+                    .trim();
             }
 
             setDocumentData(parsedData.document);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            const errorMessage = err instanceof Error 
+                ? err.message 
+                : 'An unexpected error occurred';
+            setError(errorMessage);
             console.error('Fetch error:', err);
         } finally {
             setLoading(false);
