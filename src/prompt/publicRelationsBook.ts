@@ -7,13 +7,14 @@ Please generate an announcement following this structure:
    - Sequential announcement number
    - Format according to official government document standards
 
-2. Content:
-   - Single paragraph with exactly one space between words
-   - Content must use single spacing between all words
-   - Text should be justified with single space word separation
-   - No multiple spaces allowed between any words or characters
-   - Content must maintain consistent single space formatting
-   - Use standard Thai font with single space metrics
+2. **เนื้อหาหลัก:**
+    - เรื่อง: ชี้แจงการเคลื่อนย้ายอาวุธยุทโธปกรณ์และกำลังพล
+    - อธิบายรายละเอียดเกี่ยวกับการเคลื่อนย้ายอาวุธยุทโธปกรณ์ กำลังพล เส้นทางที่ใช้ และระยะเวลาที่ดำเนินการ ได้แก่
+      - ดำเนินการระหว่างวันที่ 4 - 5 มกราคม 2569 เวลา 0600 - 1700 น.
+      - หน่วยที่เคลื่อนย้าย: กองพลทหารราบที่ 26
+      - จุดหมายปลายทาง: ศูนย์ฝึกทางยุทธวิธีกองทัพบก อำเภอชัยบาดาล จังหวัดลพบุรี
+      - เส้นทาง: จากพื้นที่จังหวัดกรุงเทพมหานคร - อำเภอโคกสำโรง - อำเภอชัยบาดาล จังหวัดลพบุรี ทั้งขาไปและขากลับ
+    - ใช้ภาษาราชการที่เป็นทางการ ชัดเจน และตรงประเด็น
 
 3. Footer:
    - Issuer: "กองทัพบก"
