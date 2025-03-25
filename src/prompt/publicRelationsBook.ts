@@ -9,7 +9,7 @@ Please generate an announcement following this structure:
 
 2. Content:
    - Single paragraph with normal Thai text spacing
-   - Content should start with "พี่น้องประชาชนชาวไทยที่เคารพ"
+   - Content should start with
    - Text should be justified with natural word spacing
    - Maintain proper Thai language spacing conventions
    - Content should flow naturally without excessive gaps between words
@@ -27,7 +27,7 @@ Please provide output in JSON format only:
     "title": "แถลงการณ์กองทัพบก",
     "subject": "Topic without เรื่อง prefix",
     "issue_number": "X", 
-    "content": "Full announcement content with natural Thai spacing...",
+    "content": "Content must be a single line with proper escaping for special characters",
     "issuer": "กองทัพบก",
     "date": "Date...",
     "department": "Department name"
@@ -35,7 +35,8 @@ Please provide output in JSON format only:
 }
 
 Note:
-- Return only the JSON structure above
+- Return only valid JSON with properly escaped characters
 - Use information as shown in the original document
+- Content must be a single line without line breaks
 - Maintain natural Thai language spacing in content
 - Do not include the word "เรื่อง" in the subject field`;

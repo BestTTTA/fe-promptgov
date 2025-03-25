@@ -44,19 +44,27 @@ export default function ExampleDoc() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: publicRelationsBookPrompt }),
             });
-            
+
             if (!response.ok) {
                 const result = await response.json();
                 throw new Error(result.error || 'Failed to generate content');
             }
 
             const result = await response.json();
+            // Parse response data with single space formatting
             const parsedData = typeof result.data === 'string'
                 ? JSON.parse(result.data)
                 : result.data;
 
             if (!parsedData?.document) {
                 throw new Error('Response does not contain "document" key.');
+            }
+
+            // Format document content with single spaces
+            if (parsedData.document.content) {
+                parsedData.document.content = parsedData.document.content
+                    .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                    .trim();               // Remove leading/trailing spaces
             }
 
             setDocumentData(parsedData.document);
@@ -76,7 +84,7 @@ export default function ExampleDoc() {
     // Handle PDF generation and download
     const handleDownloadPDF = useCallback(async () => {
         if (!previewRef.current || !documentData) return;
-        
+
         setIsPdfGenerating(true);
         try {
             // Generate canvas from DOM element
@@ -183,8 +191,8 @@ export default function ExampleDoc() {
                                     type="text"
                                     placeholder="เรื่อง"
                                     value={documentData.subject}
-                                    onChange={(e) => setDocumentData(prev => ({ 
-                                        ...prev!, 
+                                    onChange={(e) => setDocumentData(prev => ({
+                                        ...prev!,
                                         subject: e.target.value
                                     }))}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -291,12 +299,12 @@ export default function ExampleDoc() {
                             >
                                 {documentData.content}
                             </div>
-                            
+
                             {/* Document footer */}
                             <div className="text-center pl-[28mm] mb-[10.6px] text-[16px]">
                                 {documentData.issuer}
                             </div>
-                            <div className="text-center pl-[42mm] mb-[10px] text-[16px]">
+                            <div className="text-center pl-[46mm] mb-[10px] text-[16px]">
                                 {documentData.date}
                             </div>
                             <div className="text-left pl-[20mm] pr-[60mm] relative mb-[16px]">
