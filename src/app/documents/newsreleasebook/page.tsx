@@ -38,7 +38,9 @@ export default function ExampleDoc() {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: newsreleasebookPrompt }),
+                body: JSON.stringify({
+                    prompt: newsreleasebookPrompt
+                }),
             });
             const result = await response.json();
             if (!response.ok) {
@@ -61,6 +63,20 @@ export default function ExampleDoc() {
     useEffect(() => {
         fetchDocumentData();
     }, [fetchDocumentData]);
+    
+    // ✅ วาง logic ตรงนี้ หลัง documentData พร้อมแล้ว
+    const keyword = 'จึงแถลงมาเพื่อทราบโดยทั่วกัน';
+    
+    let contentLines: string[] = [];
+    
+    if (documentData?.content) {
+        const contentWithBreak = documentData.content.includes(`\n${keyword}`)
+            ? documentData.content
+            : documentData.content.replace(keyword, `\n${keyword}`);
+    
+        contentLines = contentWithBreak.split('\n');
+    }
+    
 
     const handleDownloadPDF = useCallback(async () => {
         if (!previewRef.current || !documentData) return;
@@ -252,14 +268,14 @@ export default function ExampleDoc() {
                             </div>
                             <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
                             <div
-                                className="max-w-[715px] mx-auto pl-[1.5cm] pr-[0.2cm] leading-[1.8] break-words mt-[-15px]"
+                                className="max-w-[715px] mx-auto pl-[1.5cm] pr-[0.2cm] leading-[1.5] break-words mt-[-15px]"
                                 style={{
+                                    textIndent: '2.5cm',
                                     marginTop: '-4cm',
-                                    wordSpacing: '-0.1px',
-                                    letterSpacing: '-0px',
+                                    whiteSpace: 'pre-wrap', // 🆕 สำคัญมาก
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
-                                    textJustify: 'inter-word',
+                                    textAlign: 'start', // ไม่ใช้ justify เพื่อไม่ให้ยืดช่องว่าง
                                     WebkitHyphens: 'auto',
                                     MozHyphens: 'auto',
                                     hyphens: 'auto',
@@ -269,20 +285,20 @@ export default function ExampleDoc() {
                                     lineHeight: '1.8',
                                     position: 'relative',
                                     top: '0.5cm',
-                                }}
+                                  }}                                  
                             >
-                                {documentData.content.split('\n').map((line, index) => (
+                                {contentLines.map((line, index) => (
                                     <div
                                         key={index}
                                         className={
-                                            line.trim() === 'จึงเรียนมาเพื่อทราบโดยทั่วกัน'
-                                                ? 'text-right pr-[5.5cm]'
+                                            line.trim() === keyword
+                                                ? 'text-right pr-[5.8cm]'
                                                 : 'text-justify'
                                         }
                                         style={{
-                                            textIndent: line.trim() === 'จึงเรียนมาเพื่อทราบโดยทั่วกัน' ? undefined : '2.5cm',
-                                            marginBottom: '0.5rem',
-                                        }}
+                                            textIndent: line.trim() === keyword ? undefined : '2.5cm',
+                                            marginBottom: line.trim() === keyword ? '0.1rem' : '0.2rem', // 🔧 ตรงนี้
+                                          }}
                                     >
                                         {line}
                                     </div>
