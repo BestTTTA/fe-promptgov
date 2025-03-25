@@ -68,7 +68,7 @@ export default function ExampleDoc() {
         try {
             // เพิ่มการหน่วงเวลาเล็กน้อยเพื่อให้ UI อัพเดทก่อนสร้าง PDF
             await new Promise(resolve => setTimeout(resolve, 100));
-            
+
             const canvas = await html2canvas(previewRef.current, {
                 scale: 2,
                 useCORS: true,
@@ -77,17 +77,17 @@ export default function ExampleDoc() {
                 windowWidth: 21 * 37.8,
                 windowHeight: 29.7 * 37.8,
             });
-            
+
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'cm',
                 format: 'a4',
             });
-            
+
             const imgWidth = 21;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
+
             // ใช้ข้อมูลปัจจุบันจาก documentData
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             pdf.setProperties({
@@ -96,7 +96,7 @@ export default function ExampleDoc() {
                 creator: 'Document System',
                 author: 'System',
             });
-            
+
             // เพิ่มชื่อไฟล์ที่มีความหมาย
             const fileName = `ข่าวแจก_${documentData.documentNumber || 'ไม่ระบุ'}.pdf`;
             pdf.save(fileName);
@@ -107,7 +107,7 @@ export default function ExampleDoc() {
             setIsPdfGenerating(false);
         }
     }, [documentData]); // เพิ่ม documentData ใน dependencies
-    
+
 
     const handleRefresh = useCallback(async () => {
         setLoading(true);
@@ -204,7 +204,7 @@ export default function ExampleDoc() {
                                     <label className="block text-sm font-medium text-gray-700">ส่วนราชการเจ้าของเรื่อง</label>
                                     <input
                                         type="text"
-                                        value={documentData.contactPerson}
+                                        value={documentData.contactPerson ?? ""}
                                         onChange={(e) => setDocumentData(prev => prev ? { ...prev, contactPerson: e.target.value } : null)}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
@@ -250,15 +250,13 @@ export default function ExampleDoc() {
                                     <div>{documentData.documentNumber}</div>
                                 </div>
                             </div>
-                            <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-50mm]" />
+                            <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
                             <div
-                                className="max-w-[715px] mx-auto pl-[1.5cm] pr-[0.2cm] leading-[1.8] text-justify break-words mt-[-10px]"
+                                className="max-w-[715px] mx-auto pl-[1.5cm] pr-[0.2cm] leading-[1.8] break-words mt-[-15px]"
                                 style={{
-                                    textIndent: '2.5cm',
-                                    whiteSpace: 'pre-wrap',
                                     marginTop: '-4cm',
-                                    wordSpacing: '-0.5px',
-                                    letterSpacing: '-0.3px',
+                                    wordSpacing: '-0.1px',
+                                    letterSpacing: '-0px',
                                     wordBreak: 'break-word',
                                     overflowWrap: 'break-word',
                                     textJustify: 'inter-word',
@@ -269,14 +267,33 @@ export default function ExampleDoc() {
                                     fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
                                     fontSize: '16px',
                                     lineHeight: '1.8',
+                                    position: 'relative',
+                                    top: '0.5cm',
                                 }}
                             >
-                                {documentData.content}
+                                {documentData.content.split('\n').map((line, index) => (
+                                    <div
+                                        key={index}
+                                        className={
+                                            line.trim() === 'จึงเรียนมาเพื่อทราบโดยทั่วกัน'
+                                                ? 'text-right pr-[5.5cm]'
+                                                : 'text-justify'
+                                        }
+                                        style={{
+                                            textIndent: line.trim() === 'จึงเรียนมาเพื่อทราบโดยทั่วกัน' ? undefined : '2.5cm',
+                                            marginBottom: '0.5rem',
+                                        }}
+                                    >
+                                        {line}
+                                    </div>
+                                ))}
                             </div>
 
-                            <div className="text-center pl-[4.1cm] mb-[0.4cm] text-[16px]">
+
+                            <div className="text-center pl-[4.1cm] mb-[0.4cm] mt-10 text-[16px]">
                                 {documentData.signature}
                             </div>
+
                             <div className="text-center pl-[4.3cm] mb-[0.5cm] text-[16px]">
                                 {documentData.date}
                             </div>
