@@ -10,9 +10,6 @@ const SelectPage = () => {
     const documents = [
         { name: "เอกสารแรก", path: "/documents/externalDocs", icon: "/doc-icon/google-docs.png" },
         { name: "เอกสารสอง", path: "/documents/seccondDoc", icon: "/doc-icon/paper.png" },
-        { name: "เอกสารสาม", path: "/documents/newsDocs", icon: "/doc-icon/google-docs."
-        }
-
     ];
     const documentsnormal = [
         { name: "เอกสารแรกทั่วไป", path: "/documents/firstdoc", icon: "/doc-icon/google-docs.png" },
@@ -21,13 +18,17 @@ const SelectPage = () => {
     ];
     const publicrelationsbook = [
         { name: "หนังสือแรกประชาสัมพันธ์", path: "/documents/publicRelationsBook", icon: "/doc-icon/google-docs.png" },
-    ]
+    ];
 
     const exampleDocument = [
         { name: "ทดสอบเอกสาร", path: "/documents/exampleDoc", icon: "/doc-icon/google-docs.png" },
+    ];
+
+    const newsreleasebook = [
+        { name: "หนังสือประชาสัมพันธ์ข่าว", path: "/documents/newsreleasebook", icon: "/doc-icon/google-docs.png"},
     ]
 
-    
+
 
     const filteredDocs = documents.filter((doc) =>
         doc.name.toLowerCase().includes(search.toLowerCase())
@@ -41,6 +42,10 @@ const SelectPage = () => {
     const filteredexampleDocument = exampleDocument.filter((doc) =>
         doc.name.toLowerCase().includes(search.toLowerCase())
     );
+    const filteredNewsreleasebook = newsreleasebook.filter((doc) =>
+        doc.name.toLowerCase().includes(search.toLowerCase())
+    );
+
 
     return (
         <div className="flex flex-col p-8 gap-8">
@@ -117,6 +122,25 @@ const SelectPage = () => {
                 <div className="flex gap-4 w-full pl-4">
                     {filteredexampleDocument.length > 0 ? (
                         filteredexampleDocument.map((doc, index) => (
+                            <Link
+                                key={index}
+                                href={doc.path}
+                                className="flex flex-col w-fit gap-y-4 items-center justify-center p-8 border rounded-lg hover:bg-gray-100"
+                            >
+                                <Image src={doc.icon} alt={doc.name} width={100} height={100} />
+                                <span>{doc.name}</span>
+                            </Link>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">ไม่พบเอกสารที่ค้นหา</p>
+                    )}
+                </div>
+            </div>
+            <div className="flex flex-col gap-2 w-full">
+                <p className="font-bold">หนังสือประชาสัมพันธ์ข่าว</p>
+                <div className="flex gap-4 w-full pl-4">
+                    {filteredNewsreleasebook.length > 0 ? (
+                        filteredNewsreleasebook.map((doc, index) => (
                             <Link
                                 key={index}
                                 href={doc.path}
