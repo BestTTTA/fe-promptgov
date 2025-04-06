@@ -78,84 +78,74 @@ export default function ExampleDoc() {
             </div>
         );
     };
-    const generatePdfFromData = (documentData: DocumentData) => {
-        try {
-            // Create new PDF with Thai font support and A4 dimensions
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'cm',
-                format: 'a4' // Standard A4 format
-            });
-            // Add Thai font support
-            pdf.addFont('/fonts/THSarabunNew.ttf', 'THSarabunNew', 'normal');
-            pdf.setFont('THSarabunNew');
+const generatePdfFromData = (documentData: DocumentData) => {
+    try {
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'cm',
+            format: 'a4'
+        });
+        pdf.addFont('/fonts/THSarabunNew.ttf', 'THSarabunNew', 'normal');
+        pdf.setFont('THSarabunNew');
 
-            // Standard A4 margins and dimensions in cm
-            const margin = 2.5;
-            const pageWidth = 21.0; // A4 width in cm
-            const pageHeight = 29.7; // A4 height in cm
-            const contentWidth = pageWidth - (2 * margin);
-            let yPosition = margin + 2; // Adjusted for header and Garuda
+        const margin = 2;
+        const pageWidth = 21.0;
+        const pageHeight = 29.7;
+        const contentWidth = pageWidth - (2 * margin);
+        let yPosition = margin + 1.5;
 
-            // Add Garuda image
-            const garudaWidth = 1.5;
-            const garudaHeight = 1.5;
-            pdf.addImage('/img/krut-3-cm.png', 'PNG', margin, margin, garudaWidth, garudaHeight);
+        const garudaWidth = 1.5;
+        const garudaHeight = 1.5;
+        pdf.addImage('/img/krut-3-cm.png', 'PNG', margin, margin, garudaWidth, garudaHeight);
 
-            // Add header text with consistent spacing
-            pdf.setFontSize(20);
-            pdf.text('บ  ั  น  ท  ึ  ก  ข  ้  อ  ค  ว  า  ม', pageWidth / 2, margin + 1, { align: 'center' });
+        pdf.setFontSize(20);
+        pdf.text('บันทึกข้อความ', pageWidth / 2, margin + 1, { align: 'center' });
 
-            // Set font sizes in proportion to cm with consistent character spacing
-            pdf.setFontSize(11);
-            pdf.text(documentData.referenceNumber.split('').join('  '), margin, yPosition);
-            const dateText = documentData.date.split('').join('  ');
-            const dateWidth = pdf.getStringUnitWidth(dateText) * pdf.getFontSize() / pdf.internal.scaleFactor;
-            pdf.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        pdf.setFontSize(11);
+        pdf.text(documentData.referenceNumber.split('').join(''), margin, yPosition);
+        const dateText = documentData.date.split('').join('');
+        const dateWidth = pdf.getStringUnitWidth(dateText) * pdf.getFontSize() / pdf.internal.scaleFactor;
+        pdf.text(dateText, pageWidth - margin - dateWidth, yPosition);
 
-            yPosition += 1.5;
-            pdf.setFontSize(14);
-            const subjectText = documentData.subject.split('').join('  ');
-            pdf.text(subjectText, margin, yPosition);
-            yPosition += 1;
-            const recipientText = documentData.recipient.split('').join('  ');
-            pdf.text(recipientText, margin, yPosition);
-            yPosition += 1.5;
-            pdf.setFontSize(12);
+        yPosition += 1;
+        pdf.setFontSize(14);
+        pdf.text(documentData.subject.split('').join(''), margin, yPosition);
+        yPosition += 0.8;
+        pdf.text(documentData.recipient.split('').join(''), margin, yPosition);
+        yPosition += 1;
+        pdf.setFontSize(12);
 
-            // Content sections with consistent spacing
-            const reasonText = documentData.content.reason.split('').join('  ');
-            const reasonLines = pdf.splitTextToSize(reasonText, contentWidth);
-            pdf.text(reasonLines, margin, yPosition);
-            yPosition += (reasonLines.length * 0.7) + 1;
+        const reasonText = documentData.content.reason.split('').join('');
+        const reasonLines = pdf.splitTextToSize(reasonText, contentWidth);
+        pdf.text(reasonLines, margin, yPosition);
+        yPosition += (reasonLines.length * 0.5) + 0.8;
 
-            const requestText = documentData.content.request.split('').join('  ');
-            const requestLines = pdf.splitTextToSize(requestText, contentWidth);
-            pdf.text(requestLines, margin, yPosition);
-            yPosition += (requestLines.length * 0.7) + 1;
+        const requestText = documentData.content.request.split('').join('');
+        const requestLines = pdf.splitTextToSize(requestText, contentWidth);
+        pdf.text(requestLines, margin, yPosition);
+        yPosition += (requestLines.length * 0.5) + 0.8;
 
-            const conclusionText = documentData.content.conclusion.split('').join('  ');
-            const conclusionLines = pdf.splitTextToSize(conclusionText, contentWidth);
-            pdf.text(conclusionLines, margin, yPosition);
-            yPosition += (conclusionLines.length * 0.7) + 3;
+        const conclusionText = documentData.content.conclusion.split('').join('');
+        const conclusionLines = pdf.splitTextToSize(conclusionText, contentWidth);
+        pdf.text(conclusionLines, margin, yPosition);
+        yPosition += (conclusionLines.length * 0.5) + 2;
 
-            // Signature section with consistent spacing
-            const signatureText = documentData.signature.split('').join('  ');
-            const signatureLines = pdf.splitTextToSize(signatureText, contentWidth / 2);
-            const signatureX = pageWidth - margin - (contentWidth / 4);
-            pdf.text(signatureLines, signatureX, yPosition, { align: 'center' });
-            yPosition += (signatureLines.length * 0.7) + 1;
+        const signatureText = documentData.signature.split('').join('');
+        const signatureLines = pdf.splitTextToSize(signatureText, contentWidth / 2);
+        const signatureX = pageWidth - margin - (contentWidth / 4);
+        pdf.text(signatureLines, signatureX, yPosition, { align: 'center' });
+        yPosition += (signatureLines.length * 0.5) + 0.8;
 
-            const positionText = documentData.position.split('').join('  ');
-            const positionLines = pdf.splitTextToSize(positionText, contentWidth / 2);
-            pdf.text(positionLines, signatureX, yPosition, { align: 'center' });
+        const positionText = documentData.position.split('').join('');
+        const positionLines = pdf.splitTextToSize(positionText, contentWidth / 2);
+        pdf.text(positionLines, signatureX, yPosition, { align: 'center' });
 
-            return pdf.output('datauristring');
-        } catch (err) {
-            console.error('PDF generation error:', err);
-            throw new Error(`PDF generation failed: ${err instanceof Error ? err.message : String(err)}`);
-        }
-    };
+        return pdf.output('datauristring');
+    } catch (err) {
+        console.error('PDF generation error:', err);
+        throw new Error(`PDF generation failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+};
 
     useEffect(() => {
         const fetchDocument = async () => {
