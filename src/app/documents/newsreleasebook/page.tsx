@@ -234,80 +234,84 @@ export default function ExampleDoc() {
                     </div>
 
                     {documentData && (
-                        <div className="w-full md:w-1/2 p-2 bg-gray-600">
+                        <div className="w-full md:w-1/2 p-2 bg-gray-600 overflow-hidden">
                             <h2 className="text-xl font-bold mb-4 text-white text-center">
                                 ตัวอย่าง <strong className="text-red-400 font-extrabold">PDF</strong>
                             </h2>
-                            <div
-                                id="document-preview"
-                                ref={previewRef}
-                                className={`mt-8 bg-white shadow-lg ${sarabun.className} mx-auto p-[1cm] box-border overflow-hidden relative`}
-                                style={{
-                                    boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-                                    border: '1px solid #ddd',
-                                    margin: '0 auto 0 -1.9cm',
-                                    transform: 'scale(0.8)', // 🆕 ย่อขนาดกระดาษ
-                                    transformOrigin: 'top center',
-                                    width: '23cm',
-                                    height: '30.7cm',
-                                }}
-                            >
-                                <div className="text-center relative mt-[2.5cm] pl-[0.8cm] mb-[0.3cm]">
-                                    <div className="text-2xl">{documentData.department}</div> {/* 🆕 เพิ่มขนาดตัวหนังสือ */}
-                                </div>
-                                <div className="text-center mb-[5.5cm] pl-[3cm] pr-[2cm] relative">
-                                    <div className="mb-[0.3cm] text-xl">
-                                        <span>{documentData.subject}</span>
-                                    </div>
-                                    <div className="text-center mb-[0.5cm] mt-[0.1cm] pl-[2cm] pr-[2cm] text-xl">
-                                        <div>{documentData.documentNumber}</div>
-                                    </div>
-                                </div>
-                                <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
+                            <div className="flex justify-center">
                                 <div
-                                    className="mx-auto pl-[1.5cm] pr-[0.2cm] leading-[1.5]"
+                                    id="document-preview"
+                                    ref={previewRef}
+                                    className={`mt-8 bg-white shadow-lg ${sarabun.className} p-[1cm] box-border overflow-hidden relative`}
                                     style={{
-                                        textIndent: '2.5cm',
-                                        marginTop: '-4.2cm',
-                                        whiteSpace: 'pre-wrap',
-                                        wordBreak: 'break-word',
-                                        overflowWrap: 'break-word',
-                                        textAlign: 'start',
-                                        WebkitHyphens: 'auto',
-                                        MozHyphens: 'auto',
-                                        hyphens: 'auto',
-                                        fontKerning: 'auto',
-                                        fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
-                                        fontSize: '18px', // 🆕 เพิ่มขนาดตัวหนังสือ
-                                        lineHeight: '1.8',
-                                        maxWidth: '18cm',
+                                        boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                                        border: '1px solid #ddd',
+                                        transform: 'scale(0.9)',
+                                        transformOrigin: 'top center',
+                                        width: '30cm',
+                                        height: '29.7cm',
+                                        maxWidth: '100%',
+                                        margin: '0 auto'
                                     }}
                                 >
-                                    {contentLines.map((line, index) => (
-                                        <div
-                                            key={index}
-                                            className={
-                                                line.trim() === keyword
-                                                    ? 'text-right pr-[6.8cm]'
-                                                    : 'text-justify'
-                                            }
-                                            style={{
-                                                textIndent: line.trim() === keyword ? undefined : '2.5cm',
-                                                marginBottom: line.trim() === keyword ? '0.1rem' : '0.2rem',
-                                            }}
-                                        >
-                                            {line}
+                                    <div className="text-center relative mt-[2.5cm] pl-[0.8cm] mb-[0.3cm]">
+                                        <div className="text-2xl">{documentData.department}</div>
+                                    </div>
+
+                                    <div className="text-center mb-[5.5cm] pl-[3cm] pr-[2cm] relative">
+                                        <div className="mb-[0.3cm] text-xl">
+                                            <span>{documentData.subject}</span>
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="text-center pl-[4.1cm] mb-[0.4cm] mt-10 text-xl">
-                                    {documentData.signature}
-                                </div>
-                                <div className="text-center pl-[4.3cm] mb-[0.5cm] text-xl">
-                                    {documentData.date}
-                                </div>
-                                <div className="text-left pl-[2cm] pr-[6cm] relative mb-[1.6cm]">
-                                    <div className="text-lg">{documentData.contactPerson}</div>
+                                        <div className="text-center mb-[0.5cm] mt-[0.1cm] pl-[2cm] pr-[2cm] text-xl">
+                                            <div>{documentData.documentNumber}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
+
+                                    <div
+                                        className="mx-auto pl-[1.5cm] pr-[0.8cm] leading-[1.5]"
+                                        style={{
+                                            textIndent: '2.5cm',
+                                            marginTop: '-4.2cm',
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                            overflowWrap: 'break-word',
+                                            textAlign: 'start',
+                                            WebkitHyphens: 'auto',
+                                            MozHyphens: 'auto',
+                                            hyphens: 'auto',
+                                            fontKerning: 'auto',
+                                            fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
+                                            fontSize: '18px',
+                                            lineHeight: '1.8',
+                                            maxWidth: '18cm',
+                                        }}
+                                    >
+                                        {contentLines.map((line, index) => (
+                                            <div
+                                                key={index}
+                                                className={line.trim() === keyword ? 'text-right pr-[6.8cm]' : 'text-justify'}
+                                                style={{
+                                                    textIndent: line.trim() === keyword ? undefined : '2.5cm',
+                                                    marginBottom: line.trim() === keyword ? '0.1rem' : '0.2rem',
+                                                }}
+                                            >
+                                                {line}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="text-center pl-[4.1cm] mb-[0.4cm] mt-10 text-xl">
+                                        {documentData.signature}
+                                    </div>
+                                    <div className="text-center pl-[4.3cm] mb-[0.5cm] text-xl">
+                                        {documentData.date}
+                                    </div>
+                                    <div className="text-left pl-[2cm] pr-[6cm] relative mb-[1.6cm]">
+                                        <div className="text-lg">{documentData.contactPerson}</div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
