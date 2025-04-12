@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import { Sarabun } from 'next/font/google';
 import html2canvas from 'html2canvas';
 import { newsreleasebookPrompt } from '@/prompt/newsreleasebook';
-import AIContentGenerator from '@/components/GeminiGenerator';
+import { useMediaQuery } from 'react-responsive';
 
 const sarabun = Sarabun({
     weight: ['300'],
@@ -22,14 +22,17 @@ interface DocumentData {
     contactPerson: string;
 }
 
-export default function ExampleDoc() {
+export default function newsreleasebook() {
     const [documentData, setDocumentData] = useState<DocumentData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [isPdfGenerating, setIsPdfGenerating] = useState<boolean>(false);
+    const [showPreviewOnly, setShowPreviewOnly] = useState(false);
 
     const formRef = useRef<HTMLDivElement>(null);
-    const previewRef = useRef<HTMLDivElement>(null);
+    const previewRef = useRef<HTMLDivElement | null>(null);
+
+    const isTabletOrMobile = useMediaQuery({ query: '(max-width: 1024px)' });
 
     const fetchDocumentData = useCallback(async () => {
         setLoading(true);
@@ -125,199 +128,300 @@ export default function ExampleDoc() {
         await fetchDocumentData();
     }, [fetchDocumentData]);
 
+    const handlePreviewScroll = () => {
+        setShowPreviewOnly(true);
+    };
+
+    const handleClosePreview = () => {
+        setShowPreviewOnly(false);
+    };
+
     return (
         <main className="min-h-screen bg-gray-50 flex flex-col p-4">
-            <div className="flex items-center gap-4 p-4 bg-white rounded-md drop-shadow-sm">
-                <h1 className="text-xl font-bold text-gray-800 whitespace-nowrap">Document Example</h1>
-                <div className="flex gap-4 w-full">
+            <div className="flex flex-wrap items-center gap-2 p-4 bg-white rounded-md drop-shadow-sm">
+                <h1 className="text-xl font-bold text-gray-800 whitespace-nowrap">Document newsreleasebook</h1>
+                <div className="flex flex-wrap gap-2 w-full">
                     <button
                         onClick={handleRefresh}
                         disabled={loading}
-                        className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="p-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed max-w-full"
                     >
                         {loading ? 'กำลังสร้างเนื้อหา...' : 'สร้างเนื้อหาใหม่'} 5/5
                     </button>
+                    {isTabletOrMobile && (
+                        <button
+                            onClick={handlePreviewScroll}
+                            className="ml-auto px-4 py-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-500 max-w-full whitespace-nowrap"
+                        >
+                            ดูตัวอย่าง PDF
+                        </button>
+                    )}
+                    {!isTabletOrMobile && (
+                        <button
+                            onClick={handleDownloadPDF}
+                            disabled={isPdfGenerating}
+                            className="ml-auto px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 disabled:bg-gray-400"
+                        >
+                            {isPdfGenerating ? 'กำลังสร้าง PDF...' : 'ดาวน์โหลด PDF'}
+                        </button>
+                    )}
                 </div>
-                <div className="flex whitespace-nowrap w-fit">
+            </div>
+            {isTabletOrMobile && showPreviewOnly ? (
+                <div className="fixed inset-0 bg-black/50 bg-opacity-90 z-50 flex flex-col items-center justify-center">
+                    <button
+                        onClick={handleClosePreview}
+                        className="absolute top-4 right-4 text-white text-2xl font-bold"
+                    >
+                        ✕
+                    </button>
                     <button
                         onClick={handleDownloadPDF}
                         disabled={isPdfGenerating}
-                        className="px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 disabled:bg-gray-400"
+                        className="mb-4 px-6 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 disabled:bg-gray-400"
                     >
                         {isPdfGenerating ? 'กำลังสร้าง PDF...' : 'ดาวน์โหลด PDF'}
                     </button>
-                </div>
-            </div>
-
-            <div className="overflow-x-auto md:overflow-x-hidden mt-6">
-                <div className="flex flex-row gap-4 min-w-[42cm] md:min-w-0">
-                    <div className="w-full md:w-1/2">
-                        {error && (
-                            <div className="mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                                {error}
+                    <div className="w-full overflow-x-auto max-h-[90vh] overflow-y-auto px-2">
+                        <div
+                            id="document-preview"
+                            ref={previewRef}
+                            className={`bg-white shadow-lg ${sarabun.className} p-[1cm] box-border overflow-hidden relative`}
+                            style={{
+                                boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                                border: '1px solid #ddd',
+                                transform: 'scale(0.9)',
+                                transformOrigin: 'top center',
+                                width: '21cm',
+                                height: '29.7cm',
+                                minWidth: '21cm',
+                                margin: '0 auto',
+                            }}
+                        >
+                            <div className="text-center relative mt-[2.5cm] pl-[0.8cm] mb-[0.3cm]">
+                                <div className="text-2xl">{documentData?.department}</div>
                             </div>
-                        )}
-                        {documentData && (
-                            <div
-                                id="document-form"
-                                ref={formRef}
-                                className={`mt-8 bg-white shadow ${sarabun.className} w-full max-w-[21cm] min-h-[29.7cm] mx-auto p-[2cm] box-border overflow-y-auto`}
-                            >
-                                <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">หน่วยงาน</label>
-                                    <input
-                                        type="text"
-                                        value={documentData.department}
-                                        onChange={(e) => setDocumentData(prev => prev ? { ...prev, department: e.target.value } : null)}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
-                                </div>
 
-                                <div className="mt-8">
+                            <div className="text-center mb-[5.5cm] pl-[3cm] pr-[2cm] relative">
+                                <div className="mb-[0.3cm] text-xl">
+                                    <span>{documentData?.subject}</span>
+                                </div>
+                                <div className="text-center mb-[0.5cm] mt-[0.1cm] pl-[2cm] pr-[2cm] text-xl">
+                                    <div>{documentData?.documentNumber}</div>
+                                </div>
+                            </div>
+
+                            <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
+
+                            <div
+                                className="mx-auto pl-[1.5cm] pr-[0.8cm] leading-[1.5]"
+                                style={{
+                                    textIndent: '2.5cm',
+                                    marginTop: '-4.2cm',
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    textAlign: 'start',
+                                    WebkitHyphens: 'auto',
+                                    MozHyphens: 'auto',
+                                    hyphens: 'auto',
+                                    fontKerning: 'auto',
+                                    fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
+                                    fontSize: '18px',
+                                    lineHeight: '1.8',
+                                    maxWidth: '18cm',
+                                }}
+                            >
+                                {contentLines.map((line, index) => (
+                                    <div
+                                        key={index}
+                                        className={line.trim() === keyword ? 'text-right pr-[6.8cm]' : 'text-justify'}
+                                        style={{
+                                            textIndent: line.trim() === keyword ? undefined : '2.5cm',
+                                            marginBottom: line.trim() === keyword ? '0.1rem' : '0.2rem',
+                                        }}
+                                    >
+                                        {line}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="text-center pl-[4.1cm] mb-[0.4cm] mt-10 text-xl">
+                                {documentData?.signature}
+                            </div>
+                            <div className="text-center pl-[4.3cm] mb-[0.5cm] text-xl">
+                                {documentData?.date}
+                            </div>
+                            <div className="text-left pl-[2cm] pr-[6cm] relative mb-[1.6cm]">
+                                <div className="text-lg">{documentData?.contactPerson}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="w-full max-w-7xl mx-auto">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                        <div className={`w-full ${isTabletOrMobile ? 'max-w-md mx-auto' : 'lg:w-1/2'}`}>
+
+                            {documentData && (
+                                <div
+                                    id="document-form"
+                                    ref={formRef}
+                                    className={`mt-8 bg-white shadow ${sarabun.className} w-full max-w-[21cm] min-h-[29.7cm] mx-auto p-[2cm] box-border overflow-y-auto`}
+                                >
                                     <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">เรื่อง</label>
+                                        <label className="block text-sm font-medium text-gray-700">หน่วยงาน</label>
                                         <input
                                             type="text"
-                                            value={documentData.subject}
-                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, subject: e.target.value } : null)}
+                                            value={documentData.department}
+                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, department: e.target.value } : null)}
                                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
                                     </div>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">ฉบับที่</label>
-                                        <input
-                                            type="text"
-                                            value={documentData.documentNumber}
-                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, documentNumber: e.target.value } : null)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
+
+                                    <div className="mt-8">
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700">เรื่อง</label>
+                                            <input
+                                                type="text"
+                                                value={documentData.subject}
+                                                onChange={(e) => setDocumentData(prev => prev ? { ...prev, subject: e.target.value } : null)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700">ฉบับที่</label>
+                                            <input
+                                                type="text"
+                                                value={documentData.documentNumber}
+                                                onChange={(e) => setDocumentData(prev => prev ? { ...prev, documentNumber: e.target.value } : null)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700">วัน เดือน ปี</label>
+                                            <input
+                                                type="text"
+                                                value={documentData.date}
+                                                onChange={(e) => setDocumentData(prev => prev ? { ...prev, date: e.target.value } : null)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700">ลงชื่อ</label>
+                                            <input
+                                                type="text"
+                                                value={documentData.signature}
+                                                onChange={(e) => setDocumentData(prev => prev ? { ...prev, signature: e.target.value } : null)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700">ส่วนราชการเจ้าของเรื่อง</label>
+                                            <input
+                                                type="text"
+                                                value={documentData.contactPerson ?? ""}
+                                                onChange={(e) => setDocumentData(prev => prev ? { ...prev, contactPerson: e.target.value } : null)}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700">เนื้อหา</label>
+                                            <textarea
+                                                value={documentData.content}
+                                                onChange={(e) => setDocumentData(prev => prev ? { ...prev, content: e.target.value } : null)}
+                                                className="w-full border p-2 rounded h-32 whitespace-pre-wrap overflow-wrap break-words"
+                                                style={{ lineHeight: '1.5' }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">วัน เดือน ปี</label>
-                                        <input
-                                            type="text"
-                                            value={documentData.date}
-                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, date: e.target.value } : null)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">ลงชื่อ</label>
-                                        <input
-                                            type="text"
-                                            value={documentData.signature}
-                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, signature: e.target.value } : null)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">ส่วนราชการเจ้าของเรื่อง</label>
-                                        <input
-                                            type="text"
-                                            value={documentData.contactPerson ?? ""}
-                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, contactPerson: e.target.value } : null)}
-                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">เนื้อหา</label>
-                                        <textarea
-                                            value={documentData.content}
-                                            onChange={(e) => setDocumentData(prev => prev ? { ...prev, content: e.target.value } : null)}
-                                            className="w-full border p-2 rounded h-32 whitespace-pre-wrap overflow-wrap break-words"
-                                            style={{ lineHeight: '1.5' }}
-                                        />
+                                </div>
+                            )}
+                        </div>
+                        {!isTabletOrMobile && documentData && (
+                            <div className="w-full lg:w-1/2 p-2 bg-gray-600 overflow-hidden">
+                                <h2 className="text-xl font-bold mb-4 text-white text-center">
+                                    ตัวอย่าง <strong className="text-red-400 font-extrabold">PDF</strong>
+                                </h2>
+                                <div className="flex justify-center">
+                                    <div
+                                        id="document-preview"
+                                        ref={previewRef}
+                                        className={`mt-8 bg-white shadow-lg ${sarabun.className} p-[1cm] box-border overflow-hidden relative`}
+                                        style={{
+                                            boxShadow: '0 0 10px rgba(0,0,0,0.3)',
+                                            border: '1px solid #ddd',
+                                            transform: 'scale(0.9)',
+                                            transformOrigin: 'top center',
+                                            width: '30cm',
+                                            height: '29.7cm',
+                                            maxWidth: '100%',
+                                            margin: '0 auto',
+                                        }}
+                                    >
+                                        <div className="text-center relative mt-[2.5cm] pl-[0.8cm] mb-[0.3cm]">
+                                            <div className="text-2xl">{documentData.department}</div>
+                                        </div>
+
+                                        <div className="text-center mb-[5.5cm] pl-[3cm] pr-[2cm] relative">
+                                            <div className="mb-[0.3cm] text-xl">
+                                                <span>{documentData.subject}</span>
+                                            </div>
+                                            <div className="text-center mb-[0.5cm] mt-[0.1cm] pl-[2cm] pr-[2cm] text-xl">
+                                                <div>{documentData.documentNumber}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
+
+                                        <div
+                                            className="mx-auto pl-[1.5cm] pr-[0.8cm] leading-[1.5]"
+                                            style={{
+                                                textIndent: '2.5cm',
+                                                marginTop: '-4.2cm',
+                                                whiteSpace: 'pre-wrap',
+                                                wordBreak: 'break-word',
+                                                overflowWrap: 'break-word',
+                                                textAlign: 'start',
+                                                WebkitHyphens: 'auto',
+                                                MozHyphens: 'auto',
+                                                hyphens: 'auto',
+                                                fontKerning: 'auto',
+                                                fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
+                                                fontSize: '18px',
+                                                lineHeight: '1.8',
+                                                maxWidth: '18cm',
+                                            }}
+                                        >
+                                            {contentLines.map((line, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={line.trim() === keyword ? 'text-right pr-[6.8cm]' : 'text-justify'}
+                                                    style={{
+                                                        textIndent: line.trim() === keyword ? undefined : '2.5cm',
+                                                        marginBottom: line.trim() === keyword ? '0.1rem' : '0.2rem',
+                                                    }}
+                                                >
+                                                    {line}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="text-center pl-[4.1cm] mb-[0.4cm] mt-10 text-xl">
+                                            {documentData.signature}
+                                        </div>
+                                        <div className="text-center pl-[4.3cm] mb-[0.5cm] text-xl">
+                                            {documentData.date}
+                                        </div>
+                                        <div className="text-left pl-[2cm] pr-[6cm] relative mb-[1.6cm]">
+                                            <div className="text-lg">{documentData.contactPerson}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         )}
                     </div>
-
-                    {documentData && (
-                        <div className="w-full md:w-1/2 p-2 bg-gray-600 overflow-hidden">
-                            <h2 className="text-xl font-bold mb-4 text-white text-center">
-                                ตัวอย่าง <strong className="text-red-400 font-extrabold">PDF</strong>
-                            </h2>
-                            <div className="flex justify-center">
-                                <div
-                                    id="document-preview"
-                                    ref={previewRef}
-                                    className={`mt-8 bg-white shadow-lg ${sarabun.className} p-[1cm] box-border overflow-hidden relative`}
-                                    style={{
-                                        boxShadow: '0 0 10px rgba(0,0,0,0.3)',
-                                        border: '1px solid #ddd',
-                                        transform: 'scale(0.9)',
-                                        transformOrigin: 'top center',
-                                        width: '30cm',
-                                        height: '29.7cm',
-                                        maxWidth: '100%',
-                                        margin: '0 auto'
-                                    }}
-                                >
-                                    <div className="text-center relative mt-[2.5cm] pl-[0.8cm] mb-[0.3cm]">
-                                        <div className="text-2xl">{documentData.department}</div>
-                                    </div>
-
-                                    <div className="text-center mb-[5.5cm] pl-[3cm] pr-[2cm] relative">
-                                        <div className="mb-[0.3cm] text-xl">
-                                            <span>{documentData.subject}</span>
-                                        </div>
-                                        <div className="text-center mb-[0.5cm] mt-[0.1cm] pl-[2cm] pr-[2cm] text-xl">
-                                            <div>{documentData.documentNumber}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="absolute left-[80mm] right-[70mm] h-[10px] border-b border-black mt-[-51mm]" />
-
-                                    <div
-                                        className="mx-auto pl-[1.5cm] pr-[0.8cm] leading-[1.5]"
-                                        style={{
-                                            textIndent: '2.5cm',
-                                            marginTop: '-4.2cm',
-                                            whiteSpace: 'pre-wrap',
-                                            wordBreak: 'break-word',
-                                            overflowWrap: 'break-word',
-                                            textAlign: 'start',
-                                            WebkitHyphens: 'auto',
-                                            MozHyphens: 'auto',
-                                            hyphens: 'auto',
-                                            fontKerning: 'auto',
-                                            fontFamily: '"TH SarabunPSK", "Sarabun", "Noto Sans Thai", sans-serif',
-                                            fontSize: '18px',
-                                            lineHeight: '1.8',
-                                            maxWidth: '18cm',
-                                        }}
-                                    >
-                                        {contentLines.map((line, index) => (
-                                            <div
-                                                key={index}
-                                                className={line.trim() === keyword ? 'text-right pr-[6.8cm]' : 'text-justify'}
-                                                style={{
-                                                    textIndent: line.trim() === keyword ? undefined : '2.5cm',
-                                                    marginBottom: line.trim() === keyword ? '0.1rem' : '0.2rem',
-                                                }}
-                                            >
-                                                {line}
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="text-center pl-[4.1cm] mb-[0.4cm] mt-10 text-xl">
-                                        {documentData.signature}
-                                    </div>
-                                    <div className="text-center pl-[4.3cm] mb-[0.5cm] text-xl">
-                                        {documentData.date}
-                                    </div>
-                                    <div className="text-left pl-[2cm] pr-[6cm] relative mb-[1.6cm]">
-                                        <div className="text-lg">{documentData.contactPerson}</div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
-            </div>
+            )}
         </main>
-    );
-}
+    );}
